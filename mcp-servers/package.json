@@ -1,0 +1,24 @@
+{
+  "name": "mcp-servers",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node start-servers.js",
+    "start:calendar": "node google-calendar-mcp.js",
+    "start:calendar-real": "node google-calendar-mcp-real.js",
+    "start:ai": "node ai-service-mcp.js",
+    "start:enhanced-ai": "node enhanced-ai-mcp.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^5.1.0",
+    "googleapis": "^128.0.0",
+    "ws": "^8.18.3"
+  }
+}
