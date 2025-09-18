@@ -13,17 +13,22 @@ const servers = [
   {
     name: 'Google Calendar MCP (Real)',
     script: 'google-calendar-mcp-real.js',
-    port: 8087
-  },
-  {
-    name: 'AI Service MCP',
-    script: 'ai-service-mcp.js',
-    port: 8085
+    port: 8089
   },
   {
     name: 'Enhanced AI MCP',
     script: 'enhanced-ai-mcp.js',
     port: 8086
+  },
+  {
+    name: 'AI Service MCP',
+    script: 'ai-service-mcp.js',
+    port: 8090
+  },
+  {
+    name: 'Shutdown Server',
+    script: 'shutdown-server.js',
+    port: 8091
   }
 ];
 

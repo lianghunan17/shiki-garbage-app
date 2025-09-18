@@ -20,10 +20,18 @@ import {
   parseMultipleWeekdays
 } from '../data/shikiGarbageData';
 
+interface BulkyWasteSchedule {
+  id: string;
+  date: string;
+  memo: string;
+  createdAt: Date;
+}
+
 interface GarbageScheduleCalendarProps {
   areaData: GarbageScheduleData | null;
   year: number;
   month: number;
+  bulkyWasteSchedules?: BulkyWasteSchedule[];
 }
 
 interface GarbageEvent {
@@ -45,7 +53,8 @@ interface SelectedEvent {
 const GarbageScheduleCalendar: React.FC<GarbageScheduleCalendarProps> = ({
   areaData,
   year,
-  month
+  month,
+  bulkyWasteSchedules = []
 }) => {
   const [selectedEvents, setSelectedEvents] = useState<SelectedEvent[]>([]);
   const [isRegistering, setIsRegistering] = useState(false);
@@ -84,15 +93,18 @@ const GarbageScheduleCalendar: React.FC<GarbageScheduleCalendarProps> = ({
       const calendarService = new CalendarMCPService();
 
       for (const event of selectedEvents) {
-        const eventDate = new Date(event.year, event.month - 1, event.date);
-        const startDate = eventDate.toISOString().split('T')[0];
-        const endDate = startDate;
+        // 日本時間で正確な日付を作成
+        const year = event.year;
+        const month = String(event.month).padStart(2, '0');
+        const day = String(event.date).padStart(2, '0');
+        const startDate = `${year}-${month}-${day}T08:30:00`;
+        const endDate = `${year}-${month}-${day}T09:00:00`;
 
         await calendarService.createEvent({
           title: `${event.typeName} 収集日`,
           description: `志木市 ${areaData?.area} - ${event.typeName}の収集日です`,
-          startDate: `${startDate}T08:30:00`,
-          endDate: `${startDate}T09:00:00`,
+          startDate: startDate,
+          endDate: endDate,
           location: `志木市 ${areaData?.area}`,
           reminders: [{
             method: 'popup',
@@ -117,7 +129,8 @@ const GarbageScheduleCalendar: React.FC<GarbageScheduleCalendarProps> = ({
     recyclable: { name: 'リサイクル資源', color: '#4caf50' },
     plasticResource: { name: '資源プラスチック', color: '#2196f3' },
     burnable: { name: '可燃ごみ', color: '#ff5722' },
-    nonBurnable: { name: '不燃ごみ', color: '#607d8b' }
+    nonBurnable: { name: '不燃ごみ', color: '#607d8b' },
+    bulkyWaste: { name: '粗大ごみ', color: '#ff6b35' }
   };
 
   // 指定された年月の日数を取得
@@ -225,6 +238,22 @@ const GarbageScheduleCalendar: React.FC<GarbageScheduleCalendarProps> = ({
         }
       }
     }
+    
+    // 粗大ごみ日程を追加
+    bulkyWasteSchedules.forEach(schedule => {
+      const scheduleDate = new Date(schedule.date);
+      // 日付の妥当性チェック
+      if (!isNaN(scheduleDate.getTime()) && 
+          scheduleDate.getFullYear() === year && 
+          scheduleDate.getMonth() + 1 === month) {
+        events.push({
+          date: scheduleDate.getDate(),
+          type: 'bulkyWaste',
+          color: '#ff6b35',
+          id: `${year}-${month}-${scheduleDate.getDate()}-bulkyWaste-${schedule.id}`
+        });
+      }
+    });
     
     return events.sort((a, b) => a.date - b.date);
   };

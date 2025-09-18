@@ -4,6 +4,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Container } from '@mui/material';
 import ShikiGarbageApp from './components/ShikiGarbageApp';
 import CalendarTest from './components/CalendarTest';
+import ConfusingWasteSearch from './components/ConfusingWasteSearch';
 
 // Material-UIテーマ設定
 const theme = createTheme({
@@ -62,6 +63,10 @@ function App() {
               <Route 
                 path="/calendar-test" 
                 element={<CalendarTest />} 
+              />
+              <Route 
+                path="/confusing-waste" 
+                element={<ConfusingWasteSearch />} 
               />
             </Routes>
           </Container>

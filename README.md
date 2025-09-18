@@ -32,6 +32,7 @@
 ### 前提条件
 - Node.js 16.x 以上
 - npm または yarn
+- Ollama（AI画像分析機能を使用する場合）
 
 ### インストール
 
@@ -53,14 +54,44 @@ npm install
 cd ..
 ```
 
-### 基本的な使用方法
+## 🚀 起動方法
 
-1. フロントエンドサーバーを起動
+### 方法1: 統一コマンド（推奨）
 ```bash
+npm run dev-all
+```
+このコマンド一つで以下がすべて起動します：
+- Ollamaサーバー（AI画像分析用）
+- MCPサーバー（API連携用）
+- Reactフロントエンド
+
+### 方法2: ダブルクリック起動（最も便利）
+
+#### Windows バッチファイル
+`start-dev.bat` をダブルクリックするだけで起動
+
+#### PowerShell スクリプト
+`start-dev.ps1` を右クリック → "PowerShellで実行"
+
+#### デスクトップショートカット作成
+1. `create-desktop-shortcut.vbs` をダブルクリック
+2. デスクトップに「AI画像分析デモ起動」ショートカットが作成されます
+3. 以降はショートカットをダブルクリックするだけで起動
+
+### 方法3: 個別起動
+```bash
+# フロントエンドのみ
 npm start
+
+# MCPサーバーのみ
+npm run start-mcp
+
+# Ollamaサーバーのみ
+npm run start-ollama
 ```
 
-2. ブラウザで http://localhost:3000 にアクセス
+### アクセス
+ブラウザで http://localhost:3000 にアクセス
 
 ## 🔧 Google Calendar連携の設定（オプション）
 

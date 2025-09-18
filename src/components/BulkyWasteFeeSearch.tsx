@@ -1,5 +1,12 @@
-import React, { useState, useMemo } from 'react';
-import { bulkyWasteData, searchByName, getCategories, filterByCategory, BulkyWasteItem } from '../data/bulkyWasteData';
+import React, { useState, useMemo, useEffect } from 'react';
+import Papa from 'papaparse';
+
+export interface BulkyWasteItem {
+  category: string;
+  name: string;
+  fee: number;
+  note?: string;
+}
 
 interface BulkyWasteFeeSearchProps {
   className?: string;
@@ -10,8 +17,64 @@ const BulkyWasteFeeSearch: React.FC<BulkyWasteFeeSearchProps> = ({ className = '
   const [selectedCategory, setSelectedCategory] = useState('');
   const [searchResults, setSearchResults] = useState<BulkyWasteItem[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const [bulkyWasteData, setBulkyWasteData] = useState<BulkyWasteItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const categories = useMemo(() => getCategories(), []);
+  // CSVファイルからデータを読み込む
+  useEffect(() => {
+    const loadCSVData = async () => {
+      try {
+        const response = await fetch('/bulky-waste-fee.csv');
+        const csvText = await response.text();
+        
+        Papa.parse(csvText, {
+          header: false,
+          skipEmptyLines: true,
+          complete: (results) => {
+            const data: BulkyWasteItem[] = [];
+            
+            // CSVの各行を処理（ヘッダー行をスキップ）
+            results.data.slice(1).forEach((row: any) => {
+              if (row.length >= 3) {
+                const category = row[0] || '';
+                const name = row[1] || '';
+                const feeStr = row[2] || '';
+                
+                // 手数料から数字のみを抽出
+                const feeMatch = feeStr.match(/([0-9,]+)/);
+                const fee = feeMatch ? parseInt(feeMatch[1].replace(/,/g, '')) : 0;
+                
+                if (name && fee > 0) {
+                  data.push({
+                    category: category.replace(/^\d+/, ''), // 先頭の数字を削除
+                    name,
+                    fee
+                  });
+                }
+              }
+            });
+            
+            setBulkyWasteData(data);
+            setLoading(false);
+          },
+          error: (error: any) => {
+            console.error('CSV読み込みエラー:', error);
+            setLoading(false);
+          }
+        });
+      } catch (error) {
+        console.error('ファイル読み込みエラー:', error);
+        setLoading(false);
+      }
+    };
+    
+    loadCSVData();
+  }, []);
+
+  const categories = useMemo(() => {
+    const uniqueCategories = Array.from(new Set(bulkyWasteData.map(item => item.category)));
+    return uniqueCategories.filter(cat => cat.trim() !== '');
+  }, [bulkyWasteData]);
 
   const handleSearch = () => {
     if (!searchTerm.trim()) {
@@ -20,8 +83,12 @@ const BulkyWasteFeeSearch: React.FC<BulkyWasteFeeSearchProps> = ({ className = '
       return;
     }
 
-    let results = searchByName(searchTerm);
+    // 品目名で検索
+    let results = bulkyWasteData.filter(item => 
+      item.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
     
+    // カテゴリーでフィルタリング
     if (selectedCategory) {
       results = results.filter(item => item.category === selectedCategory);
     }
@@ -40,6 +107,20 @@ const BulkyWasteFeeSearch: React.FC<BulkyWasteFeeSearchProps> = ({ className = '
   const formatFee = (fee: number): string => {
     return `${fee.toLocaleString()}円`;
   };
+
+  if (loading) {
+    return (
+      <div className={`bg-white rounded-lg shadow-md p-6 ${className}`}>
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+          粗大ごみ処理手数料検索
+        </h2>
+        <div className="text-center py-8">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          <p className="mt-2 text-gray-600">データを読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`bg-white rounded-lg shadow-md p-6 ${className}`}>
