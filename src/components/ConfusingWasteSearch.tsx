@@ -26,13 +26,16 @@ const ConfusingWasteSearch: React.FC = () => {
           header: false,
           skipEmptyLines: true,
           complete: (results) => {
-            const data: ConfusingWasteItem[] = results.data.map((row: any) => ({
+            // ヘッダー行をスキップして、データ行のみを処理
+            const dataRows = results.data.slice(1);
+            const data: ConfusingWasteItem[] = dataRows.map((row: any) => ({
               item: row[0] || '',
               handling: row[1] || '',
               reason: row[2] || ''
             }));
             setCsvData(data);
             setLoading(false);
+            console.log(`迷惑ゴミデータを読み込みました: ${data.length}件`);
           },
           error: (error: any) => {
             console.error('CSV解析エラー:', error);
